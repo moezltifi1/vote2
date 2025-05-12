@@ -1,0 +1,209 @@
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>التصويت للاعبي النادي الإفريقي</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f9f9f9;
+      text-align: right;
+      direction: rtl;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #b30000;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .player {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+      padding: 10px 15px;
+      background-color: #f1f1f1;
+      border-radius: 8px;
+    }
+
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vote-count {
+      background-color: #b30000;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    button {
+      padding: 6px 14px;
+      background-color: #b30000;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #8d0000;
+    }
+
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 25px;
+      font-size: 18px;
+      color: green;
+      text-align: center;
+    }
+
+    .total-votes {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e6f7ff;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>صوّت للاعبك المفضل من النادي الإفريقي</h1>
+
+    <div id="players">
+      <!-- Players will be dynamically inserted here -->
+    </div>
+
+    <div class="total-votes" id="total-votes">
+      <!-- Total votes will be displayed here -->
+    </div>
+
+    <div class="message" id="message"></div>
+  </div>
+
+  <script>
+    const players = [
+      "بلال آيت مالك",
+      "فيليب كينزومبي",
+      "علي يوسف",
+      "حمدي العبيدي",
+      "أحمد خليل",
+      "حمزة خضراوي",
+      "حمزة بن عبدة",
+      "معز حسن",
+      "عبد المالك كلاليش",
+      "كينيث سيماكولا",
+      "فهد تي سعد محمد",
+      "جول أرمند كو",
+      "معز الزمزمي",
+      "بسام الصرارفي",
+      "غيث الزعلوني",
+      "أسامة الشلي",
+      "مالك سعادة",
+      "صلاح عياري",
+      "غيث يفرني",
+      "وسيم المغزاوي",
+      "ياسين بو عبيد",
+      "آدم القرب",
+      "عزيز الغريسي",
+      "ويلز تين نكينغني",
+      "مكرم الصغير",
+      "محمد أمين العجيمي",
+      "محمد الصادق محمود",
+      "غيث الصغير"
+    ];
+
+    // Initialize votes from localStorage or create empty object
+    let votes = JSON.parse(localStorage.getItem('africanClubVotes')) || {};
+    let hasVoted = localStorage.getItem('hasVoted') === 'true';
+
+    // Initialize vote counts for players who don't have any votes yet
+    players.forEach(player => {
+      if (!votes[player]) {
+        votes[player] = 0;
+      }
+    });
+
+    const container = document.getElementById("players");
+    const totalVotesElement = document.getElementById("total-votes");
+    const messageElement = document.getElementById("message");
+
+    // Display all players with their vote counts
+    function renderPlayers() {
+      container.innerHTML = '';
+      
+      // Calculate total votes
+      const totalVotes = Object.values(votes).reduce((sum, count) => sum + count, 0);
+      totalVotesElement.textContent = `إجمالي عدد الأصوات: ${totalVotes}`;
+      
+      players.forEach((player, index) => {
+        const div = document.createElement("div");
+        div.className = "player";
+        
+        const voteCount = votes[player] || 0;
+        
+        div.innerHTML = `
+          <div class="player-info">
+            <span>${index + 1}. ${player}</span>
+            <span class="vote-count">${voteCount}</span>
+          </div>
+          <button 
+            onclick="vote('${player}')" 
+            ${hasVoted ? 'disabled' : ''}
+          >
+            ${hasVoted ? 'تم التصويت' : 'تصويت'}
+          </button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function vote(playerName) {
+      if (hasVoted) {
+        messageElement.textContent = 'لقد قمت بالتصويت مسبقاً!';
+        return;
+      }
+      
+      // Increment vote count
+      votes[playerName] = (votes[playerName] || 0) + 1;
+      
+      // Save to localStorage
+      localStorage.setItem('africanClubVotes', JSON.stringify(votes));
+      localStorage.setItem('hasVoted', 'true');
+      hasVoted = true;
+      
+      // Update UI
+      renderPlayers();
+      messageElement.textContent = `شكراً لتصويتك لـ ${playerName} 🌟`;
+    }
+
+    // Initial render
+    renderPlayers();
+    
+    // Show message if already voted
+    if (hasVoted) {
+      messageElement.textContent = 'لقد قمت بالتصويت مسبقاً. شكراً لمشاركتك!';
+    }
+  </script>
+</body>
+</html>
